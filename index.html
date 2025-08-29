@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocabulary Flashcards</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #fca311;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7ff;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .stat-box {
+            background: var(--light);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin: 10px;
+            text-align: center;
+            flex: 1;
+            min-width: 150px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .control-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            background-color: var(--primary);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background-color: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            background-color: var(--gray);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        button.danger {
+            background-color: var(--danger);
+        }
+
+        select, input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+        }
+
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        .card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .question {
+            font-size: 24px;
+            margin-bottom: 20px;
+            min-height: 60px;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .option {
+            padding: 15px;
+            border: 2px solid #eee;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option:hover {
+            border-color: var(--primary);
+            background-color: #f0f4ff;
+        }
+
+        .option.correct {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .option.incorrect {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .progress {
+            margin: 20px 0;
+            font-weight: bold;
+            color: var(--gray);
+        }
+
+        .feedback {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .feedback.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .summary {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: var(--light);
+            font-weight: bold;
+            cursor: pointer;
+            position: relative;
+        }
+
+        th:hover {
+            background-color: #e9ecef;
+        }
+
+        th::after {
+            content: '';
+            display: inline-block;
+            margin-left: 5px;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid #000;
+            opacity: 0.5;
+        }
+
+        th.asc::after {
+            border-top: none;
+            border-bottom: 5px solid #000;
+        }
+
+        th.desc::after {
+            border-top: 5px solid #000;
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .import-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px dashed #ddd;
+            border-radius: var(--border-radius);
+            text-align: center;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
+        .badge.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .badge.warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .badge.danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .single-add-form {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #eee;
+            border-radius: var(--border-radius);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+        }
+
+        .language-selector {
+            padding: 8px 12px;
+            border-radius: var(--border-radius);
+            border: 1px solid #ddd;
+        }
+
+        @media (max-width: 600px) {
+            .options {
+                grid-template-columns: 1fr;
+            }
+            
+            .stat-box {
+                min-width: 120px;
+            }
+            
+            header {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Vocabulary Flashcards</h1>
+                <p>Learn and practice vocabulary with spaced repetition</p>
+            </div>
+            <div>
+                <select id="languageSelector" class="language-selector">
+                    <option value="en">English</option>
+                    <option value="pl">Polski</option>
+                    <option value="tr">Türkçe</option>
+                </select>
+            </div>
+        </header>
+
+        <!-- Dashboard View -->
+        <div id="dashboardView" class="view active">
+            <div class="stats-container">
+                <div class="stat-box">
+                    <div class="stat-label" data-i18n="totalCards">Total Cards</div>
+                    <div id="totalCards" class="stat-number">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label" data-i18n="readyToPractice">Ready to Practice</div>
+                    <div id="readyToPractice" class="stat-number">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label" data-i18n="neverPracticed">Never Practiced</div>
+                    <div id="neverPracticed" class="stat-number">0</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label for="batchSize" data-i18n="batchSize">Batch Size:</label>
+                    <select id="batchSize">
+                        <option value="5">5 cards</option>
+                        <option value="10" selected>10 cards</option>
+                        <option value="15">15 cards</option>
+                        <option value="20">20 cards</option>
+                    </select>
+                    
+                    <label for="direction" data-i18n="direction">Direction:</label>
+                    <select id="direction">
+                        <option value="wordToMeaning">Word → Meaning</option>
+                        <option value="meaningToWord">Meaning → Word</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <button id="learnNewBtn" data-i18n="learnNewWords">Learn New Words</button>
+                    <button id="practiceLearnedBtn" data-i18n="practiceLearnedWords">Practice Learned Words</button>
+                    <button id="viewStatsBtn" data-i18n="viewStatistics">View Statistics</button>
+                </div>
+                
+                <div class="control-group">
+                    <button id="importBtn" data-i18n="importCards">Import Cards</button>
+                    <button id="wipeAllBtn" class="danger" data-i18n="wipeAllData">Wipe All Data</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Practice View -->
+        <div id="practiceView" class="view">
+            <div class="progress" id="progressText">Question 1 of 10</div>
+            <div class="card">
+                <div class="question" id="questionText"></div>
+                <div class="options" id="optionsContainer"></div>
+            </div>
+            <div class="feedback" id="feedback" style="display: none;"></div>
+            <button id="backToDashboardBtn" style="margin-top: 20px;" data-i18n="backToDashboard">Back to Dashboard</button>
+        </div>
+
+        <!-- Summary View -->
+        <div id="summaryView" class="view">
+            <div class="summary">
+                <h2 id="summaryTitle" data-i18n="sessionSummary">Session Summary</h2>
+                <p id="summaryText"></p>
+                <button id="summaryBtn" data-i18n="backToDashboard">Back to Dashboard</button>
+            </div>
+        </div>
+
+        <!-- Statistics View -->
+        <div id="statsView" class="view">
+            <button id="backFromStatsBtn" style="margin-bottom: 20px;" data-i18n="backToDashboard">Back to Dashboard</button>
+            <h2 data-i18n="cardStatistics">Card Statistics</h2>
+            <div class="control-group">
+                <button id="availableNowFilter" class="filter-btn active" data-i18n="availableNow">Available Now</button>
+                <button id="neverPracticedFilter" class="filter-btn" data-i18n="neverPracticed">Never Practiced</button>
+                <button id="allCardsFilter" class="filter-btn" data-i18n="allCards">All Cards</button>
+            </div>
+            <table id="statsTable">
+                <thead>
+                    <tr>
+                        <th data-i18n="word" data-sort="word">Word</th>
+                        <th data-i18n="meaning" data-sort="meaning">Meaning</th>
+                        <th data-i18n="practiced" data-sort="practiced">Practiced</th>
+                        <th data-i18n="successRate" data-sort="successRate">Success Rate</th>
+                        <th data-i18n="nextDue" data-sort="nextDueAt">Next Due</th>
+                    </tr>
+                </thead>
+                <tbody id="statsTableBody"></tbody>
+            </table>
+        </div>
+
+        <!-- Import View -->
+        <div id="importView" class="view">
+            <h2 data-i18n="importCards">Import Cards</h2>
+            <button id="backFromImportBtn" style="margin-bottom: 20px;" data-i18n="backToDashboard">Back to Dashboard</button>
+            
+            <div class="single-add-form">
+                <h3 data-i18n="addSingleCard">Add a Single Card</h3>
+                <div class="form-group">
+                    <label for="singleWord" data-i18n="word">Word:</label>
+                    <input type="text" id="singleWord" placeholder="Enter word">
+                </div>
+                <div class="form-group">
+                    <label for="singleMeaning" data-i18n="meaning">Meaning:</label>
+                    <input type="text" id="singleMeaning" placeholder="Enter meaning">
+                </div>
+                <button id="addSingleCardBtn" data-i18n="addCard">Add Card</button>
+            </div>
+            
+            <div class="import-section">
+                <h3 data-i18n="bulkImport">Bulk Import</h3>
+                <p data-i18n="importInstructions">Import cards from a text file with format: <code>word,meaning</code> on each line</p>
+                <input type="file" id="fileInput" accept=".txt,.csv">
+                <button id="processImportBtn" style="margin-top: 15px;" data-i18n="processImport">Process Import</button>
+            </div>
+            <div id="importResult" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Data model and constants
+        const INTERVALS = [60, 300, 720, 1440, 2880, 4320, 10080, 20160, 43200, 129600, 172800, 216000, 259200]; // in minutes
+        const STORAGE_KEY = 'vocabularyFlashcards';
+        const LANGUAGE_KEY = 'vocabularyAppLanguage';
+        
+        // State management
+        let cards = [];
+        let currentSession = {
+            cards: [],
+            currentIndex: 0,
+            correctCount: 0,
+            type: '' // 'learn' or 'practice'
+        };
+        
+        // Sorting state
+        let sortState = {
+            column: 'nextDueAt',
+            direction: 'asc'
+        };
+
+        // Internationalization
+        const translations = {
+            en: {
+                totalCards: "Total Cards",
+                readyToPractice: "Ready to Practice",
+                neverPracticed: "Never Practiced",
+                batchSize: "Batch Size:",
+                direction: "Direction:",
+                learnNewWords: "Learn New Words",
+                practiceLearnedWords: "Practice Learned Words",
+                viewStatistics: "View Statistics",
+                importCards: "Import Cards",
+                wipeAllData: "Wipe All Data",
+                backToDashboard: "Back to Dashboard",
+                sessionSummary: "Session Summary",
+                cardStatistics: "Card Statistics",
+                availableNow: "Available Now",
+                allCards: "All Cards",
+                word: "Word",
+                meaning: "Meaning",
+                practiced: "Practiced",
+                successRate: "Success Rate",
+                nextDue: "Next Due",
+                addSingleCard: "Add a Single Card",
+                bulkImport: "Bulk Import",
+                importInstructions: "Import cards from a text file with format: word,meaning on each line",
+                processImport: "Process Import",
+                addCard: "Add Card",
+                yes: "Yes",
+                no: "No",
+                overdue: "Overdue",
+                dueSoon: "Due soon",
+                scheduled: "Scheduled",
+                good: "Good",
+                needsWork: "Needs work",
+                poor: "Poor"
+            },
+            pl: {
+                totalCards: "Wszystkie fiszki",
+                readyToPractice: "Gotowe do powtórki",
+                neverPracticed: "Nigdy nie ćwiczono",
+                batchSize: "Rozmiar partii:",
+                direction: "Kierunek:",
+                learnNewWords: "Ucz się nowych słów",
+                practiceLearnedWords: "Ćwicz poznane słowa",
+                viewStatistics: "Zobacz statystyki",
+                importCards: "Importuj fiszki",
+                wipeAllData: "Wyczyść wszystkie dane",
+                backToDashboard: "Powrót do pulpitu",
+                sessionSummary: "Podsumowanie sesji",
+                cardStatistics: "Statystyki fiszek",
+                availableNow: "Dostępne teraz",
+                allCards: "Wszystkie fiszki",
+                word: "Słowo",
+                meaning: "Znaczenie",
+                practiced: "Ćwiczono",
+                successRate: "Wskaźnik sukcesu",
+                nextDue: "Następny termin",
+                addSingleCard: "Dodaj pojedynczą fiszkę",
+                bulkImport: "Import zbiorczy",
+                importInstructions: "Importuj fiszki z pliku tekstowego w formacie: słowo,znaczenie w każdej linii",
+                processImport: "Przetwórz import",
+                addCard: "Dodaj fiszkę",
+                yes: "Tak",
+                no: "Nie",
+                overdue: "Zaległe",
+                dueSoon: "Wkrótce",
+                scheduled: "Zaplanowane",
+                good: "Dobry",
+                needsWork: "Wymaga pracy",
+                poor: "Słaby"
+            },
+            tr: {
+                totalCards: "Toplam Kart",
+                readyToPractice: "Pratik İçin Hazır",
+                neverPracticed: "Hiç Çalışılmadı",
+                batchSize: "Grup Boyutu:",
+                direction: "Yön:",
+                learnNewWords: "Yeni Kelimeler Öğren",
+                practiceLearnedWords: "Öğrenilenleri Tekrarla",
+                viewStatistics: "İstatistikleri Görüntüle",
+                importCards: "Kartları İçe Aktar",
+                wipeAllData: "Tüm Verileri Sil",
+                backToDashboard: "Panele Dön",
+                sessionSummary: "Oturum Özeti",
+                cardStatistics: "Kart İstatistikleri",
+                availableNow: "Şimdi Uygun",
+                allCards: "Tüm Kartlar",
+                word: "Kelime",
+                meaning: "Anlam",
+                practiced: "Çalışıldı",
+                successRate: "Başarı Oranı",
+                nextDue: "Sonraki Tekrar",
+                addSingleCard: "Tek Kart Ekle",
+                bulkImport: "Toplu İçe Aktarım",
+                importInstructions: "Metin dosyasından kartları içe aktar: her satıra kelime,anlam formatında",
+                processImport: "İçe Aktarımı İşle",
+                addCard: "Kart Ekle",
+                yes: "Evet",
+                no: "Hayır",
+                overdue: "Gecikmiş",
+                dueSoon: "Yakında",
+                scheduled: "Planlanmış",
+                good: "İyi",
+                needsWork: "Çalışma Gerekli",
+                poor: "Zayıf"
+            }
+        };
+        
+        let currentLanguage = 'en';
+
+        // DOM Elements
+        const views = {
+            dashboard: document.getElementById('dashboardView'),
+            practice: document.getElementById('practiceView'),
+            summary: document.getElementById('summaryView'),
+            stats: document.getElementById('statsView'),
+            import: document.getElementById('importView')
+        };
+
+        // Initialize the application
+        function init() {
+            loadLanguage();
+            loadCards();
+            updateDashboard();
+            setupEventListeners();
+            applyTranslations();
+        }
+
+        // Load language preference
+        function loadLanguage() {
+            const savedLanguage = localStorage.getItem(LANGUAGE_KEY);
+            if (savedLanguage) {
+                currentLanguage = savedLanguage;
+                document.getElementById('languageSelector').value = currentLanguage;
+            }
+        }
+
+        // Apply translations to the UI
+        function applyTranslations() {
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (translations[currentLanguage][key]) {
+                    if (element.tagName === 'INPUT' && element.placeholder) {
+                        element.placeholder = translations[currentLanguage][key];
+                    } else {
+                        element.textContent = translations[currentLanguage][key];
+                    }
+                }
+            });
+        }
+
+        // Load cards from localStorage
+        function loadCards() {
+            const storedCards = localStorage.getItem(STORAGE_KEY);
+            if (storedCards) {
+                cards = JSON.parse(storedCards);
+            }
+        }
+
+        // Save cards to localStorage
+        function saveCards() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
+        }
+
+        // Update dashboard statistics
+        function updateDashboard() {
+            const totalCards = cards.length;
+            const neverPracticed = cards.filter(card => !card.practiced).length;
+            const readyToPractice = cards.filter(isCardReadyToPractice).length;
+            
+            document.getElementById('totalCards').textContent = totalCards;
+            document.getElementById('neverPracticed').textContent = neverPracticed;
+            document.getElementById('readyToPractice').textContent = readyToPractice;
+            
+            // Enable/disable buttons based on card availability
+            document.getElementById('learnNewBtn').disabled = neverPracticed === 0;
+            document.getElementById('practiceLearnedBtn').disabled = readyToPractice === 0;
+        }
+
+        // Check if a card is ready to practice
+        function isCardReadyToPractice(card) {
+            if (!card.practiced) return false;
+            
+            const now = new Date();
+            const dueDate = new Date(card.nextDueAt);
+            
+            return card.successRate < 0.7 || now >= dueDate;
+        }
+
+        // Switch between views
+        function showView(viewName) {
+            Object.keys(views).forEach(key => {
+                views[key].classList.remove('active');
+            });
+            views[viewName].classList.add('active');
+            
+            if (viewName === 'stats') {
+                showStatistics('availableNow');
+            }
+        }
+
+        // Generate a unique ID
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substring(2);
+        }
+
+        // Start a learning session with new words
+        function startLearnSession() {
+            const batchSize = parseInt(document.getElementById('batchSize').value);
+            const direction = document.getElementById('direction').value;
+            
+            const newWords = cards.filter(card => !card.practiced);
+            if (newWords.length === 0) {
+                alert(currentLanguage === 'pl' ? 'Brak nowych słów do nauki!' : 
+                      currentLanguage === 'tr' ? 'Öğrenilecek yeni kelime yok!' :
+                      'No new words to learn!');
+                return;
+            }
+            
+            // Shuffle and select cards
+            const selectedCards = shuffleArray(newWords).slice(0, batchSize);
+            
+            currentSession = {
+                cards: selectedCards,
+                currentIndex: 0,
+                correctCount: 0,
+                type: 'learn',
+                direction: direction
+            };
+            
+            showPracticeCard();
+            showView('practice');
+        }
+
+        // Start a practice session with learned words
+        function startPracticeSession() {
+            const batchSize = parseInt(document.getElementById('batchSize').value);
+            const direction = document.getElementById('direction').value;
+            
+            const readyCards = cards.filter(isCardReadyToPractice);
+            if (readyCards.length === 0) {
+                alert(currentLanguage === 'pl' ? 'Brak fiszek gotowych do powtórki. Poczekaj, aż nadejdzie odpowiedni czas lub więcej fiszek spadnie poniżej 70%.' : 
+                      currentLanguage === 'tr' ? 'Şu anda pratik yapmaya hazır kart yok. Lütfen zamanı gelene kadar bekleyin veya daha fazla kart %70\'in altına düşsün.' :
+                      'No cards are ready to practice right now. Please wait until due time or until more cards fall below 70%.');
+                return;
+            }
+            
+            // Shuffle and select cards
+            const selectedCards = shuffleArray(readyCards).slice(0, batchSize);
+            
+            currentSession = {
+                cards: selectedCards,
+                currentIndex: 0,
+                correctCount: 0,
+                type: 'practice',
+                direction: direction
+            };
+            
+            showPracticeCard();
+            showView('practice');
+        }
+
+        // Display the current practice card
+        function showPracticeCard() {
+            const { currentIndex, cards: sessionCards, direction } = currentSession;
+            const card = sessionCards[currentIndex];
+            
+            if (!card) {
+                endSession();
+                return;
+            }
+            
+            document.getElementById('progressText').textContent = 
+                `${currentLanguage === 'pl' ? 'Pytanie' : currentLanguage === 'tr' ? 'Soru' : 'Question'} ${currentIndex + 1} ${currentLanguage === 'pl' ? 'z' : currentLanguage === 'tr' ? '/' : 'of'} ${sessionCards.length}`;
+            
+            // Set question based on direction
+            const isWordToMeaning = direction === 'wordToMeaning';
+            document.getElementById('questionText').textContent = isWordToMeaning ? card.word : card.meaning;
+            
+            // Generate options
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            // Get correct answer and distractors
+            const correctAnswer = isWordToMeaning ? card.meaning : card.word;
+            const distractors = getDistractors(card, isWordToMeaning);
+            
+            // Combine and shuffle options
+            const allOptions = [correctAnswer, ...distractors];
+            const shuffledOptions = shuffleArray(allOptions);
+            
+            // Create option elements
+            shuffledOptions.forEach(option => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.textContent = option;
+                optionElement.addEventListener('click', () => checkAnswer(option, correctAnswer));
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // Hide feedback
+            document.getElementById('feedback').style.display = 'none';
+        }
+
+        // Get distractors for multiple choice options
+        function getDistractors(card, isWordToMeaning) {
+            // Filter out the current card
+            const otherCards = cards.filter(c => c.id !== card.id);
+            
+            // Shuffle and take up to 3
+            const shuffled = shuffleArray(otherCards);
+            const distractors = shuffled.slice(0, 3);
+            
+            // Return the appropriate field (word or meaning)
+            return distractors.map(d => isWordToMeaning ? d.meaning : d.word);
+        }
+
+        // Check if the selected answer is correct
+        function checkAnswer(selectedAnswer, correctAnswer) {
+            const isCorrect = selectedAnswer === correctAnswer;
+            const card = currentSession.cards[currentSession.currentIndex];
+            
+            // Update card stats
+            card.timesShown++;
+            if (isCorrect) {
+                card.correctCount++;
+            } else {
+                card.wrongCount++;
+            }
+            
+            card.successRate = card.correctCount / (card.correctCount + card.wrongCount);
+            card.lastAskedAt = new Date().toISOString();
+            
+            // For new cards in learning session, initialize scheduling
+            if (currentSession.type === 'learn') {
+                card.practiced = true;
+                card.scheduleIndex = 1;
+            } else {
+                // For practice session, update scheduling
+                if (isCorrect) {
+                    card.scheduleIndex = Math.min(card.scheduleIndex + 1, INTERVALS.length - 1);
+                } else {
+                    card.scheduleIndex = Math.max(0, card.scheduleIndex - 1);
+                }
+            }
+            
+            // Calculate next due date
+            const intervalMinutes = INTERVALS[card.scheduleIndex];
+            const nextDueDate = new Date();
+            nextDueDate.setMinutes(nextDueDate.getMinutes() + intervalMinutes);
+            card.nextDueAt = nextDueDate.toISOString();
+            
+            // Update session stats
+            if (isCorrect) {
+                currentSession.correctCount++;
+            }
+            
+            // Show feedback
+            const feedbackElement = document.getElementById('feedback');
+            feedbackElement.textContent = isCorrect ? 
+                (currentLanguage === 'pl' ? 'Poprawnie!' : currentLanguage === 'tr' ? 'Doğru!' : 'Correct!') : 
+                `${currentLanguage === 'pl' ? 'Niepoprawnie. Prawidłowa odpowiedź:' : currentLanguage === 'tr' ? 'Yanlış. Doğru cevap:' : 'Incorrect. The answer is:'} ${correctAnswer}`;
+            feedbackElement.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+            feedbackElement.style.display = 'block';
+            
+            // Disable options
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => {
+                option.style.pointerEvents = 'none';
+                if (option.textContent === correctAnswer) {
+                    option.classList.add('correct');
+                } else if (option.textContent === selectedAnswer && !isCorrect) {
+                    option.classList.add('incorrect');
+                }
+            });
+            
+            // Auto-advance after delay
+            setTimeout(() => {
+                currentSession.currentIndex++;
+                
+                if (currentSession.currentIndex < currentSession.cards.length) {
+                    showPracticeCard();
+                } else {
+                    endSession();
+                }
+                
+                saveCards();
+            }, 700);
+        }
+
+        // End the current session and show summary
+        function endSession() {
+            const { correctCount, cards: sessionCards, type } = currentSession;
+            const totalQuestions = sessionCards.length;
+            const accuracy = totalQuestions > 0 ? (correctCount / totalQuestions * 100).toFixed(1) : 0;
+            
+            document.getElementById('summaryTitle').textContent = 
+                type === 'learn' ? 
+                (currentLanguage === 'pl' ? 'Sesja nauki zakończona' : currentLanguage === 'tr' ? 'Öğrenme Oturumu Tamamlandı' : 'Learning Session Complete') : 
+                (currentLanguage === 'pl' ? 'Sesja powtórkowa zakończona' : currentLanguage === 'tr' ? 'Pratik Oturumu Tamamlandı' : 'Practice Session Complete');
+            
+            document.getElementById('summaryText').textContent = 
+                currentLanguage === 'pl' ? `Uzyskałeś ${correctCount} na ${totalQuestions} poprawnych odpowiedzi (${accuracy}% dokładności).` :
+                currentLanguage === 'tr' ? `${totalQuestions} sorudan ${correctCount} tanesini doğru yanıtladınız (%${accuracy} doğruluk).` :
+                `You got ${correctCount} out of ${totalQuestions} correct (${accuracy}% accuracy).`;
+            
+            showView('summary');
+            updateDashboard();
+        }
+
+        // Show statistics table with sorting
+        function showStatistics(filter = 'availableNow') {
+            const tableBody = document.getElementById('statsTableBody');
+            tableBody.innerHTML = '';
+            
+            let filteredCards = [];
+            
+            switch (filter) {
+                case 'availableNow':
+                    filteredCards = cards.filter(isCardReadyToPractice);
+                    break;
+                case 'neverPracticed':
+                    filteredCards = cards.filter(card => !card.practiced);
+                    break;
+                default:
+                    filteredCards = [...cards];
+            }
+            
+            // Apply sorting
+            filteredCards.sort((a, b) => {
+                let valueA, valueB;
+                
+                switch (sortState.column) {
+                    case 'word':
+                        valueA = a.word.toLowerCase();
+                        valueB = b.word.toLowerCase();
+                        break;
+                    case 'meaning':
+                        valueA = a.meaning.toLowerCase();
+                        valueB = b.meaning.toLowerCase();
+                        break;
+                    case 'practiced':
+                        valueA = a.practiced;
+                        valueB = b.practiced;
+                        break;
+                    case 'successRate':
+                        valueA = a.successRate || 0;
+                        valueB = b.successRate || 0;
+                        break;
+                    case 'nextDueAt':
+                        valueA = a.nextDueAt ? new Date(a.nextDueAt).getTime() : 0;
+                        valueB = b.nextDueAt ? new Date(b.nextDueAt).getTime() : 0;
+                        break;
+                    default:
+                        valueA = a[sortState.column];
+                        valueB = b[sortState.column];
+                }
+                
+                if (valueA < valueB) return sortState.direction === 'asc' ? -1 : 1;
+                if (valueA > valueB) return sortState.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+            
+            // Update table headers to show sorting state
+            document.querySelectorAll('th').forEach(header => {
+                header.classList.remove('asc', 'desc');
+                if (header.getAttribute('data-sort') === sortState.column) {
+                    header.classList.add(sortState.direction);
+                }
+            });
+            
+            filteredCards.forEach(card => {
+                const row = document.createElement('tr');
+                
+                // Format last asked date
+                const lastAsked = card.lastAskedAt ? 
+                    new Date(card.lastAskedAt).toLocaleDateString() : 'Never';
+                
+                // Format next due date with time
+                let nextDue = translations[currentLanguage]['no'];
+                let dueBadge = '';
+                if (card.nextDueAt) {
+                    const dueDate = new Date(card.nextDueAt);
+                    nextDue = dueDate.toLocaleString();
+                    
+                    const now = new Date();
+                    if (dueDate < now) {
+                        dueBadge = `<span class="badge danger">${translations[currentLanguage]['overdue']}</span>`;
+                    } else if ((dueDate - now) < 24 * 60 * 60 * 1000) {
+                        dueBadge = `<span class="badge warning">${translations[currentLanguage]['dueSoon']}</span>`;
+                    } else {
+                        dueBadge = `<span class="badge success">${translations[currentLanguage]['scheduled']}</span>`;
+                    }
+                }
+                
+                // Format success rate
+                let successRate = 'N/A';
+                let successBadge = '';
+                if (card.practiced && card.timesShown > 0) {
+                    successRate = `${(card.successRate * 100).toFixed(1)}%`;
+                    
+                    if (card.successRate >= 0.7) {
+                        successBadge = `<span class="badge success">${translations[currentLanguage]['good']}</span>`;
+                    } else if (card.successRate >= 0.5) {
+                        successBadge = `<span class="badge warning">${translations[currentLanguage]['needsWork']}</span>`;
+                    } else {
+                        successBadge = `<span class="badge danger">${translations[currentLanguage]['poor']}</span>`;
+                    }
+                }
+                
+                row.innerHTML = `
+                    <td>${card.word}</td>
+                    <td>${card.meaning}</td>
+                    <td>${card.practiced ? translations[currentLanguage]['yes'] : translations[currentLanguage]['no']}</td>
+                    <td>${successRate} ${successBadge}</td>
+                    <td>${nextDue} ${dueBadge}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Import cards from file
+        function importCards(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                const lines = content.split('\n');
+                let importedCount = 0;
+                let updatedCount = 0;
+                
+                lines.forEach(line => {
+                    const [word, meaning] = line.split(',').map(s => s.trim());
+                    if (word && meaning) {
+                        // Check if word already exists
+                        const existingIndex = cards.findIndex(c => c.word === word);
+                        
+                        if (existingIndex >= 0) {
+                            // Update existing card
+                            cards[existingIndex].meaning = meaning;
+                            updatedCount++;
+                        } else {
+                            // Add new card
+                            cards.push({
+                                id: generateId(),
+                                word,
+                                meaning,
+                                practiced: false,
+                                timesShown: 0,
+                                correctCount: 0,
+                                wrongCount: 0,
+                                successRate: 0,
+                                lastAskedAt: null,
+                                scheduleIndex: 0,
+                                nextDueAt: null
+                            });
+                            importedCount++;
+                        }
+                    }
+                });
+                
+                saveCards();
+                updateDashboard();
+                
+                document.getElementById('importResult').innerHTML = `
+                    <div class="feedback success">
+                        ${currentLanguage === 'pl' ? 'Import zakończony!' : currentLanguage === 'tr' ? 'İçe aktarma tamamlandı!' : 'Import completed!'}<br>
+                        ${importedCount} ${currentLanguage === 'pl' ? 'nowych fiszek zaimportowano' : currentLanguage === 'tr' ? 'yeni kart içe aktarıldı' : 'new cards imported'}<br>
+                        ${updatedCount} ${currentLanguage === 'pl' ? 'istniejących fiszek zaktualizowano' : currentLanguage === 'tr' ? 'mevcut kart güncellendi' : 'existing cards updated'}
+                    </div>
+                `;
+            };
+            reader.readAsText(file);
+        }
+
+        // Add a single card
+        function addSingleCard() {
+            const wordInput = document.getElementById('singleWord');
+            const meaningInput = document.getElementById('singleMeaning');
+            
+            const word = wordInput.value.trim();
+            const meaning = meaningInput.value.trim();
+            
+            if (!word || !meaning) {
+                alert(currentLanguage === 'pl' ? 'Proszę wypełnić zarówno słowo, jak i znaczenie.' :
+                      currentLanguage === 'tr' ? 'Lütfen hem kelime hem de anlamı girin.' :
+                      'Please fill in both word and meaning.');
+                return;
+            }
+            
+            // Check if word already exists
+            const existingIndex = cards.findIndex(c => c.word === word);
+            
+            if (existingIndex >= 0) {
+                // Update existing card
+                cards[existingIndex].meaning = meaning;
+                alert(currentLanguage === 'pl' ? 'Słowo już istnieje. Zaktualizowano jego znaczenie.' :
+                      currentLanguage === 'tr' ? 'Kelime zaten mevcut. Anlamı güncellendi.' :
+                      'Word already exists. Updated its meaning.');
+            } else {
+                // Add new card
+                cards.push({
+                    id: generateId(),
+                    word,
+                    meaning,
+                    practiced: false,
+                    timesShown: 0,
+                    correctCount: 0,
+                    wrongCount: 0,
+                    successRate: 0,
+                    lastAskedAt: null,
+                    scheduleIndex: 0,
+                    nextDueAt: null
+                });
+                alert(currentLanguage === 'pl' ? 'Dodano nową fiszkę!' :
+                      currentLanguage === 'tr' ? 'Yeni kart eklendi!' :
+                      'Added new card!');
+            }
+            
+            // Clear inputs
+            wordInput.value = '';
+            meaningInput.value = '';
+            
+            saveCards();
+            updateDashboard();
+        }
+
+        // Wipe all data after confirmation
+        function wipeAllData() {
+            if (confirm(currentLanguage === 'pl' ? 'Czy na pewno chcesz usunąć wszystkie fiszki? Tej operacji nie można cofnąć.' :
+                      currentLanguage === 'tr' ? 'Tüm kartları silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.' :
+                      'Are you sure you want to delete all cards? This action cannot be undone.')) {
+                cards = [];
+                saveCards();
+                updateDashboard();
+                alert(currentLanguage === 'pl' ? 'Wszystkie dane zostały usunięte.' :
+                      currentLanguage === 'tr' ? 'Tüm veriler silindi.' :
+                      'All data has been wiped.');
+            }
+        }
+
+        // Shuffle array using Fisher-Yates algorithm
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Dashboard buttons
+            document.getElementById('learnNewBtn').addEventListener('click', startLearnSession);
+            document.getElementById('practiceLearnedBtn').addEventListener('click', startPracticeSession);
+            document.getElementById('viewStatsBtn').addEventListener('click', () => {
+                showStatistics('availableNow');
+                showView('stats');
+            });
+            document.getElementById('importBtn').addEventListener('click', () => showView('import'));
+            document.getElementById('wipeAllBtn').addEventListener('click', wipeAllData);
+            
+            // Back buttons
+            document.getElementById('backToDashboardBtn').addEventListener('click', () => showView('dashboard'));
+            document.getElementById('summaryBtn').addEventListener('click', () => showView('dashboard'));
+            document.getElementById('backFromStatsBtn').addEventListener('click', () => showView('dashboard'));
+            document.getElementById('backFromImportBtn').addEventListener('click', () => showView('dashboard'));
+            
+            // Import functionality
+            document.getElementById('processImportBtn').addEventListener('click', () => {
+                const fileInput = document.getElementById('fileInput');
+                if (fileInput.files.length > 0) {
+                    importCards(fileInput.files[0]);
+                } else {
+                    alert(currentLanguage === 'pl' ? 'Proszę wybrać plik do importu.' :
+                          currentLanguage === 'tr' ? 'Lütfen içe aktarılacak bir dosya seçin.' :
+                          'Please select a file to import.');
+                }
+            });
+            
+            // Add single card
+            document.getElementById('addSingleCardBtn').addEventListener('click', addSingleCard);
+            
+            // Statistics filters
+            document.getElementById('availableNowFilter').addEventListener('click', () => {
+                showStatistics('availableNow');
+                setActiveFilter('availableNowFilter');
+            });
+            document.getElementById('neverPracticedFilter').addEventListener('click', () => {
+                showStatistics('neverPracticed');
+                setActiveFilter('neverPracticedFilter');
+            });
+            document.getElementById('allCardsFilter').addEventListener('click', () => {
+                showStatistics('all');
+                setActiveFilter('allCardsFilter');
+            });
+            
+            // Table sorting
+            document.querySelectorAll('th[data-sort]').forEach(header => {
+                header.addEventListener('click', () => {
+                    const column = header.getAttribute('data-sort');
+                    
+                    if (sortState.column === column) {
+                        // Toggle direction if same column
+                        sortState.direction = sortState.direction === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        // New column, default to ascending
+                        sortState.column = column;
+                        sortState.direction = 'asc';
+                    }
+                    
+                    // Re-apply the current filter with new sorting
+                    const activeFilter = document.querySelector('.filter-btn.active');
+                    if (activeFilter.id === 'availableNowFilter') showStatistics('availableNow');
+                    else if (activeFilter.id === 'neverPracticedFilter') showStatistics('neverPracticed');
+                    else showStatistics('all');
+                });
+            });
+            
+            // Language selector
+            document.getElementById('languageSelector').addEventListener('change', (e) => {
+                currentLanguage = e.target.value;
+                localStorage.setItem(LANGUAGE_KEY, currentLanguage);
+                applyTranslations();
+                updateDashboard();
+            });
+        }
+
+        // Set active filter button
+        function setActiveFilter(activeId) {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(activeId).classList.add('active');
+        }
+
+        // Initialize the app when the DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
